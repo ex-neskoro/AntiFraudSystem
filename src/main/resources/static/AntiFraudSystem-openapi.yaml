@@ -1,0 +1,623 @@
+openapi: "3.0.3"
+info:
+  title: "AntiFraudSystem API"
+  description: "This is a OpenAPI documentation for AntiFraudSystem API by [ex.neskoro](https://github.com/ex-neskoro)"
+  version: "1.0.0"
+servers:
+  - url: "https://localhost:28852"
+paths:
+  /api/antifraud/history:
+    get:
+      summary: "Get all transactions"
+      operationId: "getAllTransactions"
+      tags:
+        - Transaction
+      description: "Get list of all transactions order by ID, ASC"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Transaction"
+  /api/antifraud/history/{number}:
+    get:
+      summary: "Get transaction by card number"
+      operationId: "getAllTransactionsByCardNumber"
+      tags:
+        - Transaction
+      description: "Get list of all transactions by specified card number"
+      parameters:
+        - name: "number"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Transaction"
+        "400":
+          description: "Return Bad request if card number had wrong format - see [Luhn algorithm](https://en.wikipedia.org/wiki/Luhn_algorithm)"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/antifraud/stolencard:
+    get:
+      summary: "Get all stolen cards"
+      operationId: "getAllStolenCards"
+      tags:
+        - Card
+      description: "Get list of all cards that has been stolen"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Card"
+    post:
+      summary: "Add stolen card"
+      operationId: "addStolenCard"
+      tags:
+        - Card
+      description: "Add card stolen card"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/Card"
+        "400":
+          description: "Return Bad request if specified card number has wrong format - see [Luhn algorithm](https://en.wikipedia.org/wiki/Luhn_algorithm)"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: "Return Conflict if card with specified number already exist"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/antifraud/stolencard/{number}:
+    delete:
+      summary: "Delete card by number"
+      operationId: "deleteCard"
+      tags:
+        - Card
+      parameters:
+        - name: "number"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/StatusDTO"
+        "400":
+          description: "Return Bad request if specified card number has wrong format - see [Luhn algorithm](https://en.wikipedia.org/wiki/Luhn_algorithm)"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "Return Not found if card with specified number not found"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/antifraud/suspicious-ip:
+    get:
+      summary: "Get all suspicious ip"
+      operationId: "getAllIPs"
+      tags:
+        - IP
+      description: "Get list of all suspicious IPs"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/IP"
+    post:
+      summary: "Add suspicious IP"
+      operationId: "addSuspiciousIP"
+      tags:
+        - IP
+      description: "Add Suspicious IP"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IpDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/IP"
+        "400":
+          description: "Return Bad request if IP has wrong format"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: "Return Conflict if specified IP already exist"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/antifraud/suspicious-ip/{ip}:
+    delete:
+      summary: "Delete IP"
+      operationId: "deleteIP"
+      tags:
+        - IP
+      description: "Delete specified IP"
+      parameters:
+        - name: "ip"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/StatusDTO"
+        "400":
+          description: "Return Bad request if IP has wrong format"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "Return Not found if specified IP not found"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/antifraud/transaction:
+    put:
+      summary: "Give feedback to transaction"
+      operationId: "processFeedback"
+      tags:
+        - Transaction
+      description: "Edit transaction information by giving it feedback"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Feedback"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: "Return Not found if transaction with specified ID not found"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: "Return Conflict if specified transaction already has feedback status"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: "Return Unprocessable Entity if specified status in feedback equals transaction status - see feedback processing in README"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: "Add transaction"
+      operationId: "processTran"
+      tags:
+        - Transaction
+      description: "Add new transaction to system"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/TransactionStatusDTO"
+        "400":
+          description: "Return Bad request if card number has wrong format - see [Luhn algorithm](https://en.wikipedia.org/wiki/Luhn_algorithm). Also if IP has wrong format."
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/auth/access:
+    put:
+      summary: "Change user access"
+      operationId: "changeUserLockStatus"
+      tags:
+        - Auth
+      description: "Change user access - lock or unlock"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLockChangeDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/StatusDTO"
+        "400":
+          description: "Return Bad request if specified user has role Administrator"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: "Return Not found in user with specified username not found"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/auth/list:
+    get:
+      summary: "Get all users"
+      operationId: "getAllUsers"
+      tags:
+        - Auth
+      description: "Get list of all users"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+  /api/auth/role:
+    put:
+      summary: "Change user role"
+      operationId: "setUserRole"
+      tags:
+        - Auth
+      description: "Change user role to specified in request"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRoleChangeDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Return Bad request if you try to change any role except Merchant or Support role"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: "Return Conflict if you try change user role to the same role"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/auth/user:
+    post:
+      summary: "Register user"
+      operationId: "registerUser"
+      tags:
+        - Auth
+      description: "Register user with specified credits"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDTO"
+        required: true
+      responses:
+        "201":
+          description: "CREATED"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/User"
+        "409":
+          description: "Return Conflict if user with specified username already created"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/auth/user/{username}:
+    delete:
+      summary: "Delete user"
+      operationId: "deleteUser"
+      tags:
+        - Auth
+      description: "Delete user with specified username"
+      parameters:
+        - name: "username"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            'applications/json':
+              schema:
+                $ref: "#/components/schemas/UserStatusDTO"
+        "404":
+          description: "Return Not found if user with specified username not found"
+          content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/doc:
+    get:
+      summary: "Get this documentation page"
+      description: "Returns this page"
+      tags:
+        - Doc
+      operationId: "getDoc"
+      responses:
+        "200":
+          description: "OK"
+components:
+  schemas:
+    Transaction:
+      type: "object"
+      properties:
+        transactionId:
+          type: "integer"
+          format: "int64"
+          example: 1
+        amount:
+          type: "integer"
+          format: "int64"
+          example: 200
+        ip:
+          type: "string"
+          example: "255.255.255.255"
+        number:
+          type: "string"
+          example: "4532434405967209"
+        region:
+          type: "string"
+          enum:
+            - "EAP"
+            - "ECA"
+            - "HIC"
+            - "LAC"
+            - "MENA"
+            - "SA"
+            - "SSA"
+        date:
+          type: "string"
+          format: "date-time"
+          example: "yyyy-MM-ddTHH:mm:ss"
+        result:
+          type: "string"
+          enum:
+            - "ALLOWED"
+            - "PROHIBITED"
+            - "MANUAL_PROCESSING"
+        feedback:
+          type: "string"
+          enum:
+            - "ALLOWED"
+            - "PROHIBITED"
+            - "MANUAL_PROCESSING"
+    Card:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 123
+        number:
+          type: "string"
+          example: "4532434405967209"
+    CardDTO:
+      type: "object"
+      properties:
+        number:
+          type: "string"
+          example: "4532434405967209"
+    StatusDTO:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          example: "Custom status message"
+    IP:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        ip:
+          type: "string"
+          example: "255.255.255.255"
+    IpDTO:
+      type: "object"
+      properties:
+        ip:
+          type: "string"
+          example: "255.255.255.255"
+    Feedback:
+      type: "object"
+      properties:
+        transactionId:
+          type: "integer"
+          format: "int64"
+          example: 1
+        feedback:
+          type: "string"
+          enum:
+            - "ALLOWED"
+            - "PROHIBITED"
+            - "MANUAL_PROCESSING"
+    TransactionDTO:
+      type: "object"
+      properties:
+        amount:
+          type: "integer"
+          format: "int64"
+          example: 200
+        ip:
+          type: "string"
+          example: "255.255.255.255"
+        number:
+          type: "string"
+          example: "4532434405967209"
+        region:
+          type: "string"
+          enum:
+            - "EAP"
+            - "ECA"
+            - "HIC"
+            - "LAC"
+            - "MENA"
+            - "SA"
+            - "SSA"
+        date:
+          type: "string"
+          format: "date-time"
+          example: "yyyy-MM-ddTHH:mm:ss"
+    TransactionStatusDTO:
+      type: "object"
+      properties:
+        result:
+          type: "string"
+          enum:
+            - "ALLOWED"
+            - "PROHIBITED"
+            - "MANUAL_PROCESSING"
+        info:
+          type: "string"
+          example: "Custom info message"
+    UserLockChangeDTO:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: "userName"
+        operation:
+          type: "string"
+          enum:
+            - "LOCK"
+            - "UNLOCK"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        name:
+          type: "string"
+          example: "name"
+        username:
+          type: "string"
+          example: "userName"
+    UserDTO:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "name"
+        username:
+          type: "string"
+          example: "username"
+    UserRoleChangeDTO:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: "username"
+        role:
+          type: "string"
+          enum:
+            - "MERCHANT"
+            - "ADMINISTRATOR"
+            - "SUPPORT"
+    UserStatusDTO:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: "username"
+        status:
+          type: "string"
+          example: "Custom status message"
+    Error:
+      type: "object"
+      properties:
+        timestamp:
+          type: "string"
+          format: "2023-04-10T15:30:38.792+00:00"
+          example: "2023-04-10T15:30:38.792+00:00"
+        status:
+          type: "integer"
+          format: "int32"
+          example: 400
+        error:
+          type: "string"
+          example: "Bad Request"
+        message:
+          type: "string"
+          example: "Custom error message"
+        path:
+          type: "string"
+          example: "/api/path/to"

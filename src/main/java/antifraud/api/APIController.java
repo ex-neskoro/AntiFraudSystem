@@ -1,5 +1,6 @@
 package antifraud.api;
 
+import antifraud.LocalPaths;
 import antifraud.model.StatusDTO;
 import antifraud.model.card.Card;
 import antifraud.model.card.CardDTO;
@@ -23,6 +24,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -62,11 +66,6 @@ public class APIController {
         return transactionService.findAllByCardNumber(number);
     }
 
-//    @PostMapping("/api/saveTran")
-//    public Transaction saveTran(@RequestBody Transaction transaction) {
-//        return transactionService.saveTran(transaction);
-//    }
-
     @PostMapping("/api/auth/user")
     public ResponseEntity<User> registerUser(@Valid @RequestBody User user) {
         user = userService.registerUser(user);
@@ -95,7 +94,7 @@ public class APIController {
     }
 
     @PostMapping("/api/antifraud/suspicious-ip")
-    public IP addSuspisiousIP(@Valid @RequestBody IP ip) {
+    public IP addSuspiciousIP(@Valid @RequestBody IP ip) {
         return ipService.addIP(ip);
     }
 
@@ -122,5 +121,17 @@ public class APIController {
     @GetMapping("/api/antifraud/stolencard")
     public List<Card> getAllStolenCards() {
         return cardService.findAllCards();
+    }
+
+    @GetMapping(value = "api/doc", produces = "text/html")
+    public ResponseEntity<String> getOpenApiDoc() {
+        Path htmlFilePath = Path.of(LocalPaths.OPEN_API_DOC);
+        String htmlContent;
+        try {
+            htmlContent = Files.readString(htmlFilePath);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(htmlContent, HttpStatus.OK);
     }
 }

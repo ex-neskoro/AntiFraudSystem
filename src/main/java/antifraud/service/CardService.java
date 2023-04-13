@@ -44,24 +44,6 @@ public class CardService {
         return checkLuhn(number);
     }
 
-    private boolean isPassingLuhn(long num) {
-        int sum = 0;
-        int currDigit = 0;
-        for (int i = 0; i < 16; i++) {
-            currDigit = (int) (num % 10);
-            if (i % 2 == 1) {
-                currDigit *= 2;
-                if (currDigit > 9) {
-                    currDigit -= 9;
-                }
-            }
-            sum += currDigit;
-            num /= 10;
-        }
-
-        return sum % 10 == 0;
-    }
-
     private boolean checkLuhn(String number)
     {
         int nDigits = number.length();
