@@ -56,6 +56,10 @@ of [JetBrains Spring Security for Java Backend Developers course](https://hypers
 This project has OpenAPI 3.0 documentation in .yaml and .html format which includes information about all api
 endpoints — you can check it by going to server page by "**/api/doc**" path.
 
+```text
+http://localhost:28852/api/doc
+```
+
 ## Role model
 
 In this table, you can see which role have access to which path.
